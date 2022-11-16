@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import time
 
-debug = True
+debug = False
 # ask for player name and how many rounds they want to play
 player_id = input("What is your name?\n")
 rounds_tot = int(input("How many rounds would you like to play?\n"))
