@@ -1,10 +1,25 @@
-#This will be the script that handles the main game of RPS
+# This will be the script that handles the main game of RPS
 import random
 import numpy as np
 import pandas as pd
 import time
+import tensorflow as tf
+from tensorflow import keras
+#from keras import models
+from keras.models import load_model
 
 debug = False
+
+# Load Models
+#fc_network_name = 'fully_trained_model_fcn_3.h5'
+fc_network_name = 'Large_model_fcn.h5'
+
+if debug:
+    print("Loading FCN...")
+fc_network = load_model(fc_network_name)
+if debug:
+    print("Done!")
+
 # ask for player name and how many rounds they want to play
 player_id = input("What is your name?\n")
 rounds_tot = int(input("How many rounds would you like to play?\n"))
@@ -283,6 +298,20 @@ def model_5():
         model_pred = what_beats_this[str(np.argmax(choice_tally))] # choose what would beat the most common move
     return model_pred
 
+# model 6 - a complex model trained on rps data that guesses the next move based on the previous 7 moves. Fully Connected Network
+
+def model_6():
+    model_pred = -1 # assigning this a value for rounds that it will be unused
+    if Round > 6:
+        last_7 = []
+        for i in range(1,8):
+            last_7.append(history['player_choice'][Round - i]) # create list of last 7 moves
+        print(len(last_7))
+        input_7 = [last_7]
+        model_probs = fc_network.predict(input_7)
+        model_pred = what_beats_this[str(np.argmax(model_probs))] # choose what would beat the most likely move
+    return model_pred
+
 def ensembler():
     round_score = []
     for i in range(len(history['model_outcomes'][0])):
@@ -304,10 +333,10 @@ losses = 0
 ties = 0
 while Round < rounds_tot:
     # call models and create choice list
-    choice_list = [model_0(),model_1(),model_2(),model_3(),model_4(),model_5()]
+    choice_list = [model_0(),model_1(),model_2(),model_3(),model_4(),model_5(),model_6()]
     if Round == 0:
         selected_model = 0
-        round_score = [0.0,0.0,0.0,0.0,0.0,0.0]
+        round_score = [0.0,0.0,0.0,0.0,0.0,0.0,0.0]
     else:
         round_score = ensembler()
         selected_model = np.argmax(round_score)
